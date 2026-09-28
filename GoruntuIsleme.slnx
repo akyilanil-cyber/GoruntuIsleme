@@ -4,4 +4,5 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="Hafta2_Odev1/Hafta2_Odev1.vcxproj" Id="2ceb8361-6c32-460f-94b2-9ea010bed5ce" />
+  <Project Path="Hafta2_Odev2/Hafta2_Odev2.vcxproj" Id="b67b64b9-5048-4a0f-a1c0-1915f6b08ee7" />
 </Solution>
