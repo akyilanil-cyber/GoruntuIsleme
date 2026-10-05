@@ -7,4 +7,7 @@
   <Project Path="Hafta2_Odev2/Hafta2_Odev2.vcxproj" Id="b67b64b9-5048-4a0f-a1c0-1915f6b08ee7" />
   <Project Path="Hafta2_Odev3/Hafta2_Odev3.vcxproj" Id="fad28d75-64cc-4a72-9899-290a16a32218" />
   <Project Path="Hafta2_Odev4/Hafta2_Odev4.vcxproj" Id="e90acf9a-cba3-4cd7-bc88-c974becc90ee" />
+  <Project Path="Hafta3_Odev2/Hafta3_Odev2.vcxproj" Id="d1716b8b-981e-4eb3-b8ee-d52ffc676939" />
+  <Project Path="Hafta3_Odev3/Hafta3_Odev3.vcxproj" Id="90b06c0a-ab64-410c-8ba2-628492ede7bd" />
+  <Project Path="Hafta3_Odev4/Hafta3_Odev4.vcxproj" Id="b258be6f-89c8-4910-b347-a046ccc74284" />
 </Solution>
