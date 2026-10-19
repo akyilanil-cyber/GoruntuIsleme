@@ -11,7 +11,7 @@ Colab'daki hazır `opencv-python` paketi CUDA desteği olmadan derlenmiştir (`c
 ## Adımlar
 1. Çalışma zamanı türü **T4 GPU** seçilir. `nvidia-smi` ve `nvcc --version` ile GPU ve CUDA sürümü kontrol edilir.
 2. Derleme araçları kurulur (cmake, build-essential, resim kütüphaneleri).
-3. OpenCV 4.10.0 ve opencv_contrib 4.10.0 indirilir (iki deponun sürümü aynı olmalıdır).
+3. OpenCV 4.14.0 ve opencv_contrib 4.14.0 indirilir (iki deponun sürümü aynı olmalıdır).
 4. CMake ayarları:
    - `WITH_CUDA=ON`: CUDA desteği
    - `CUDA_ARCH_BIN=7.5`: yalnızca T4'ün mimarisi için derler, süreyi kısaltır
