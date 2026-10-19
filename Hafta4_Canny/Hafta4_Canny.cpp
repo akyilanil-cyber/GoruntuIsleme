@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <vector>
 #include <chrono>
+#include "../Hafta4_Ortak/kenar_ortak.hpp"   // sentetik goruntu ve F1 olcumu (adim deneyi icin)
 
 using namespace cv;
 using namespace std;
@@ -192,6 +193,71 @@ double uyum(const Mat& a, const Mat& b)
     return 2 * k * d / (k + d);
 }
 
+// ---------------------------------------------------------------------------
+// ADIM DENEYI: Her adim neden gerekli?
+// Kenarlarin yeri bilinen sentetik goruntude adimlar tek tek cikarilir.
+// Her surum icin F1'i en yuksek yapan esik aranir (dusuk = yuksek / 2),
+// boylece fark esik seciminden degil adimin kendisinden kaynaklanir.
+// ---------------------------------------------------------------------------
+struct DeneySonucu { Dogruluk d; double kalinlik; int parca; };
+
+DeneySonucu deneyOlc(const Mat& kenar, const Mat& gercek)
+{
+    DeneySonucu s;
+    s.d = dogrulukOlc(kenar, gercek);
+    // Gercek kenar (morfolojik gradyan) 2 piksel kalinligindadir; uzunlugu = sayi / 2
+    s.kalinlik = countNonZero(kenar) / (countNonZero(gercek) / 2.0);
+    Mat etiket;
+    s.parca = connectedComponents(kenar, etiket, 8) - 1;   // arka plan haric parca sayisi
+    return s;
+}
+
+void adimDeneyi(double gurultuSigma)
+{
+    Mat temiz, gurultulu, gercek;
+    sentetikGoruntu(temiz, gurultulu, gercek, gurultuSigma);
+    int gercekParca;
+    { Mat e; gercekParca = connectedComponents(gercek, e, 8) - 1; }
+
+    // Ara sonuclar bir kez hesaplanir, esik aramasi sadece son adimi tekrarlar
+    Mat f; gurultulu.convertTo(f, CV_32F);
+    Mat yumusak = gurultuBastir(gurultulu);
+    Mat bG, yG, bY, yY;
+    sobelGradyan(yumusak, bG, yG);    // Gauss var
+    sobelGradyan(f, bY, yY);          // Gauss yok
+    Mat nmsG = nonMaxBastirma(bG, yG);
+    Mat nmsY = nonMaxBastirma(bY, yY);
+
+    auto tekEsik = [](const Mat& m, double t) { Mat k = m >= t; return k; };
+    struct Surum { const char* ad; const char* dosya; function<Mat(double)> uret; double ust; };
+    double mG, mY;
+    minMaxLoc(bG, nullptr, &mG);
+    minMaxLoc(bY, nullptr, &mY);
+    vector<Surum> surumler = {
+        { "Tam Canny (4 adim)        ", "deney_tam_canny.png",   [&](double t) { return histerezisEsikleme(nmsG, (float)t / 2, (float)t); }, mG },
+        { "1. adim yok (Gauss yok)   ", "deney_gauss_yok.png",   [&](double t) { return histerezisEsikleme(nmsY, (float)t / 2, (float)t); }, mY },
+        { "3. adim yok (NMS yok)     ", "deney_nms_yok.png",     [&](double t) { return histerezisEsikleme(bG, (float)t / 2, (float)t); }, mG },
+        { "4. adim yok (tek esik)    ", "deney_tek_esik.png",    [&](double t) { return tekEsik(nmsG, t); }, mG },
+        { "Sadece Gauss+Sobel+esik   ", "deney_sadece_sobel.png", [&](double t) { return tekEsik(bG, t); }, mG },
+    };
+
+    cout << "\nGurultu sigma = " << gurultuSigma << " (gercek kenar parca sayisi = " << gercekParca << ")" << endl;
+    cout << "  Surum                       F1     Kesinlik Duyarlilik Kalinlik Parca" << endl;
+    for (const Surum& s : surumler)
+    {
+        double esik;
+        enIyiEsikAra(s.uret, s.ust, gercek, &esik);
+        Mat kenar = s.uret(esik);
+        DeneySonucu r = deneyOlc(kenar, gercek);
+        cout << "  " << s.ad << "  " << r.d.f1 << "  " << r.d.kesinlik << "    " << r.d.duyarlilik
+            << "      " << setprecision(2) << r.kalinlik << " px  " << r.parca << setprecision(3) << endl;
+        if (gurultuSigma == 40)
+            imwrite(s.dosya, kenar);
+    }
+    if (gurultuSigma == 40)
+        imwrite("deney_gurultulu_girdi.png", gurultulu);
+}
+
 int main()
 {
     // OpenCV'nin INFO mesajlarini kapat
@@ -255,6 +321,11 @@ int main()
     renkli.setTo(Scalar(0, 0, 255), benim & ~opencv);
     renkli.setTo(Scalar(0, 255, 0), ~benim & opencv);
     imwrite("fark_renkli.png", renkli);
+
+    // Her adim neden gerekli? Adimlari tek tek cikararak olc
+    cout << "\n=== Adim deneyi (sentetik goruntu, 2 piksel tolerans) ===" << endl;
+    for (double s : { 12.0, 25.0, 40.0 })
+        adimDeneyi(s);
 
     imshow("Gri", gri);
     imshow("1) Gauss 5x5", g1);
