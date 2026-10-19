@@ -33,8 +33,20 @@ Görüntü: 868 x 600 (520800 piksel), eşikler 50 / 100
 - Süre: kendi = 58 ms, OpenCV = 7 ms. OpenCV tam sayı aritmetiği ve SIMD kullanır, bizim kodumuz ise açık döngülerle yazılmıştır.
 - Küçük farklar, OpenCV'nin yönü 4 sınıfa yuvarlarken kullandığı tam sayı yaklaşımından ve eşitlik durumlarındaki farklı karşılaştırma kurallarından kaynaklanır (fark_renkli.png: beyaz = ikisinde de, kırmızı = sadece bizde, yeşil = sadece OpenCV'de).
 
+## Her adım neden gerekli?
+Tartışma ve adımları tek tek çıkararak yapılan deney: **[Canny_Adimlari.md](Canny_Adimlari.md)**
+
+Kısa özet (σ = 40 gürültülü sentetik görüntü):
+
+| Sürüm | F1 | Kenar kalınlığı | Parça sayısı |
+|---|---|---|---|
+| Tam Canny | 0,991 | 1,00 px | 10 |
+| Gauss yok | 0,691 | 1,07 px | 132 |
+| NMS yok | 0,979 | 3,10 px | 6 |
+| Histerezis yerine tek eşik | 0,952 | 0,81 px | 97 |
+
 ## Çıktılar
-1_gauss.png, 2_sobel_gradyan.png, 3_non_max_suppression.png, 4_histerezis_sonuc.png, opencv_canny.png, fark_renkli.png
+1_gauss.png, 2_sobel_gradyan.png, 3_non_max_suppression.png, 4_histerezis_sonuc.png, opencv_canny.png, fark_renkli.png, deney_*.png (adım deneyi, σ = 40)
 
 ## Gereksinimler
 Visual Studio 2026, OpenCV 4.14.0
